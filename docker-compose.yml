@@ -1,0 +1,47 @@
+version: '3.9'
+
+services:
+
+  database:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: new1234
+      MYSQL_DATABASE: restautant
+      MYSQL_USER: new
+      MYSQL_PASSWORD: new1234
+      # MYSQL_ALLOW_EMPTY_PASSWORD: yes
+    ports:
+      - 3307:3306
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - mynetwork
+
+  backend:
+    build: ./backend/
+    ports:
+      - 8082:8082
+    depends_on:
+      - database
+    environment:
+      DB_HOST: database
+      DB_USER: new
+      DB_PASSWORD: new1234
+      DB_DATABASE: restautant
+    networks:
+      - mynetwork
+
+  frontend:
+    build: ./frontend/
+    ports:
+      - 3000:3000
+    environment:
+      - http://localhost:8082
+    networks:
+      - mynetwork
+    
+
+networks:
+  mynetwork:
+    driver: bridge
